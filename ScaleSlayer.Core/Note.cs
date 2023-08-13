@@ -9,6 +9,11 @@ namespace ScaleSlayer.Core
     /// </summary>
     public struct Note
     {
+        #region Static Data
+
+        /// <summary>
+        /// Dictionary containing valid letters for note names
+        /// </summary>
         public static readonly Dictionary<char, char> ValidLetters = new()
         {
             { 'A', 'A' },
@@ -27,6 +32,9 @@ namespace ScaleSlayer.Core
             { 'g', 'G' }
         };
 
+        /// <summary>
+        /// Dictionary containing valid string representations for accidentals
+        /// </summary>
         public static readonly Dictionary<string, Accidental> ValidAccidentals = new()
         {
             { "flat", Accidental.Flat },
@@ -47,7 +55,11 @@ namespace ScaleSlayer.Core
             new(@"^\s*(?<letter>[A-G])\s*(?<accidental>flat|b|sharp|\#|♭|♯)?\s*(?<octave>([1-9][0-9]+)|[0-9])?\s*$",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-        private char _letter;
+        #endregion
+
+
+
+        #region Public Properties
 
         /// <summary>
         /// The Letter used to designate the note (A, B, C, D, E, F, G)
@@ -58,6 +70,7 @@ namespace ScaleSlayer.Core
             get { return _letter; }
             set { _letter = ValidLetters[value]; }
         }
+        private char _letter;
 
         /// <summary>
         /// Whether the note is a Flat, Sharp, or Natural
@@ -69,7 +82,6 @@ namespace ScaleSlayer.Core
         /// </summary>
         public int Octave { get; set; }
 
-        private int _cents;
 
         /// <summary>
         /// The percent of detuning between two semitones (100 cents = 1 semitone)
@@ -82,6 +94,13 @@ namespace ScaleSlayer.Core
                 _cents = value;
             }
         }
+        private int _cents;
+
+        #endregion
+
+
+
+        #region Constructors
 
         /// <summary>
         /// Instantiates a new <see cref="Note"/> object at A4.
@@ -104,29 +123,17 @@ namespace ScaleSlayer.Core
             Cents = cents;
         }
 
+        #endregion
+
+
+
+        #region Public Functions
+
         /// <summary>
-        /// Implicitly converts a string representation of a note into a <see cref="Note"/>
+        /// Returns a note that is identical in pitch but notated as its enharmonic.
         /// </summary>
-        /// <param name="note">The string representation of a note</param>
-        public static implicit operator Note(string note)
-        {
-            // match string with regex
-            var match = NoteRegex.Match(note);
-            if (!match.Success)
-            {
-                throw new ArgumentException("Note string could not be parsed into a valid Note", "note");
-            }
-
-            // get regex match groups
-            var groups = match.Groups;
-            var letter = char.Parse(groups["letter"].Value);
-            var accidental = groups["accidental"].Success ? ValidAccidentals[groups["accidental"].Value.ToLower()] : Accidental.Natural;
-            var octave = groups["octave"].Success ? int.Parse(groups["octave"].Value) : 4;
-
-            // construct new note object
-            return new Note(letter, accidental, octave);
-        }
-
+        /// <returns>Returns a new <see cref="Note"/> struct that is equal to the calling struct, but represented as its enharmonic.</returns>
+        /// <exception cref="InvalidEnumArgumentException">Thrown when <see cref="Note.Accidental"/> is set to a value outside its specified enumeration</exception>
         public Note Enharmonic() => Accidental switch
         {
             Accidental.Natural => Letter switch
@@ -154,6 +161,41 @@ namespace ScaleSlayer.Core
             _ => throw new InvalidEnumArgumentException("Property \"Accidental\" has a non-standard enum value.")
         };
 
+        #endregion
+
+
+
+        #region Implicit Type Conversions
+
+        /// <summary>
+        /// Implicitly converts a string representation of a note into a <see cref="Note"/>
+        /// </summary>
+        /// <param name="note">The string representation of a note</param>
+        public static implicit operator Note(string note)
+        {
+            // match string with regex
+            var match = NoteRegex.Match(note);
+            if (!match.Success)
+            {
+                throw new ArgumentException("Note string could not be parsed into a valid Note", "note");
+            }
+
+            // get regex match groups
+            var groups = match.Groups;
+            var letter = char.Parse(groups["letter"].Value);
+            var accidental = groups["accidental"].Success ? ValidAccidentals[groups["accidental"].Value.ToLower()] : Accidental.Natural;
+            var octave = groups["octave"].Success ? int.Parse(groups["octave"].Value) : 4;
+
+            // construct new note object
+            return new Note(letter, accidental, octave);
+        }
+
+        #endregion
+
+
+
+        #region Function Overrides
+
         public override bool Equals([NotNullWhen(true)] object? obj)
         {
             // force usage of equality operator if other object is a Note
@@ -164,6 +206,21 @@ namespace ScaleSlayer.Core
             return base.Equals(obj);
         }
 
+        public override int GetHashCode() =>
+            (Letter, Accidental, Octave, Cents).GetHashCode();
+
+        #endregion
+
+
+
+        #region Operator Overloads
+
+        /// <summary>
+        /// Comparison Equality operator between two <see cref="Note"/>s.
+        /// </summary>
+        /// <param name="left">The <see cref="Note"/> on the left-hand side of the operator</param>
+        /// <param name="right">The <see cref="Note"/> on the right-hand side of the operator</param>
+        /// <returns>Returns true if the notes compared represent the same note (or are enharmonic)</returns>
         public static bool operator ==(Note left, Note right)
         {
             var enharmonic = right.Enharmonic();
@@ -173,18 +230,25 @@ namespace ScaleSlayer.Core
                 if (left.Octave == right.Octave || left.Octave == enharmonic.Octave)
                 {
                     // notes have same cents and octave, just check letter and accidental
-                    if ((left.Letter == right.Letter && left.Accidental == right.Accidental) ||
-                        (left.Letter == enharmonic.Letter && left.Accidental == enharmonic.Accidental))
-                    {
-                        return true;
-                    }
+                    return
+                        (left.Letter == right.Letter && left.Accidental == right.Accidental) ||
+                        (left.Letter == enharmonic.Letter && left.Accidental == enharmonic.Accidental);
                 }
             }
 
             return false;
         }
 
+        /// <summary>
+        /// Comparison Inequality operator between two <see cref="Note"/>s.
+        /// </summary>
+        /// <param name="left">The <see cref="Note"/> on the left-hand side of the operator</param>
+        /// <param name="right">The <see cref="Note"/> on the right-hand side of the operator</param>
+        /// <returns>Returns true if the notes compared do note represent the same note (or are not enharmonic)</returns>
         public static bool operator !=(Note left, Note right) => !(left == right);
+
+        #endregion
+
 
         ///// <summary>
         ///// Returns a new <see cref="Note"/> that's offset by a certain number of <paramref name="semitones"/>.
