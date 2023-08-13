@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34003.232
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScaleSlayer.Core", "ScaleSlayer.Core\ScaleSlayer.Core.csproj", "{F57A7BD3-0B7F-4CCC-8CFD-8FDEE4DDFA77}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{15AE244D-54BB-4226-8936-A4F5839C978D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScaleSlayer.Core.Test", "ScaleSlayer.Core.Test\ScaleSlayer.Core.Test.csproj", "{29FCCD0C-C006-4222-9FD5-7135D182B767}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F57A7BD3-0B7F-4CCC-8CFD-8FDEE4DDFA77}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F57A7BD3-0B7F-4CCC-8CFD-8FDEE4DDFA77}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F57A7BD3-0B7F-4CCC-8CFD-8FDEE4DDFA77}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F57A7BD3-0B7F-4CCC-8CFD-8FDEE4DDFA77}.Release|Any CPU.Build.0 = Release|Any CPU
+		{29FCCD0C-C006-4222-9FD5-7135D182B767}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29FCCD0C-C006-4222-9FD5-7135D182B767}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29FCCD0C-C006-4222-9FD5-7135D182B767}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29FCCD0C-C006-4222-9FD5-7135D182B767}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{29FCCD0C-C006-4222-9FD5-7135D182B767} = {15AE244D-54BB-4226-8936-A4F5839C978D}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D16ACDCE-DF0F-47B4-B0F8-065E9E8CBC58}
+	EndGlobalSection
+EndGlobal
