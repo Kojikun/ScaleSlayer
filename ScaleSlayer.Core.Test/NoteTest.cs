@@ -1,4 +1,8 @@
 ﻿
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.ComponentModel;
+using System.Net;
+
 namespace ScaleSlayer.Core.Test
 {
     [TestClass]
@@ -109,10 +113,14 @@ namespace ScaleSlayer.Core.Test
             Assert.AreEqual(new Note('F', Accidental.Sharp), new Note('G', Accidental.Flat));
             Assert.AreEqual(new Note('G', Accidental.Sharp), new Note('A', Accidental.Flat));
 
+            // test note with weird enum
+            var botchedNote = new Note('A', (Accidental)4);
+            Assert.ThrowsException<InvalidEnumArgumentException>(() => botchedNote.Enharmonic());
+
         }
 
         [TestMethod]
-        public void ComparisonOperator_Equals()
+        public void Operator_Equals()
         {
             // make two identical notes
             var A4 = new Note('A');
@@ -140,6 +148,149 @@ namespace ScaleSlayer.Core.Test
             Assert.IsTrue(Ab4 == Gs4);
             Assert.AreEqual(Ab4, Gs4);
             Assert.AreEqual(Ab4, Ab4.Enharmonic());
+
+            Assert.AreEqual(new Note('C', Accidental.Flat), new Note('B', Accidental.Natural, 3));
+        }
+
+        [TestMethod]
+        public void DistanceToMiddleC()
+        {
+            Assert.AreEqual(0, new Note('C', Accidental.Natural).DistanceToMiddleC());
+            Assert.AreEqual(1, new Note('C', Accidental.Sharp).DistanceToMiddleC());
+            Assert.AreEqual(1, new Note('D', Accidental.Flat).DistanceToMiddleC());
+            Assert.AreEqual(2, new Note('D', Accidental.Natural).DistanceToMiddleC());
+            Assert.AreEqual(3, new Note('D', Accidental.Sharp).DistanceToMiddleC());
+            Assert.AreEqual(3, new Note('E', Accidental.Flat).DistanceToMiddleC());
+            Assert.AreEqual(4, new Note('E', Accidental.Natural).DistanceToMiddleC());
+            Assert.AreEqual(5, new Note('E', Accidental.Sharp).DistanceToMiddleC());
+            Assert.AreEqual(4, new Note('F', Accidental.Flat).DistanceToMiddleC());
+            Assert.AreEqual(5, new Note('F', Accidental.Natural).DistanceToMiddleC());
+            Assert.AreEqual(6, new Note('F', Accidental.Sharp).DistanceToMiddleC());
+            Assert.AreEqual(6, new Note('G', Accidental.Flat).DistanceToMiddleC());
+            Assert.AreEqual(7, new Note('G', Accidental.Natural).DistanceToMiddleC());
+            Assert.AreEqual(8, new Note('G', Accidental.Sharp).DistanceToMiddleC());
+            Assert.AreEqual(8, new Note('A', Accidental.Flat).DistanceToMiddleC());
+            Assert.AreEqual(9, new Note('A', Accidental.Natural).DistanceToMiddleC());
+            Assert.AreEqual(10, new Note('A', Accidental.Sharp).DistanceToMiddleC());
+            Assert.AreEqual(10, new Note('B', Accidental.Flat).DistanceToMiddleC());
+            Assert.AreEqual(11, new Note('B', Accidental.Natural).DistanceToMiddleC());
+            Assert.AreEqual(12, new Note('B', Accidental.Sharp).DistanceToMiddleC());
+            Assert.AreEqual(11, new Note('C', Accidental.Flat).DistanceToMiddleC());
+
+
+            Assert.AreEqual(-3, new Note('A', octave: 3).DistanceToMiddleC());
+            Assert.AreEqual(-48, new Note('C', octave: 0).DistanceToMiddleC());
+        }
+
+        [TestMethod]
+        public void Operator_Subtract()
+        {
+            // A note subtracted by itself is 0 semitones apart
+            var A4 = new Note('A');
+            Assert.AreEqual(0, A4 - A4);
+
+            // B is 2 semitones apart from A
+            var B4 = new Note('B');
+            Assert.AreEqual(2, B4 - A4);
+
+            // An octave is 12 semitones away
+            var A5 = A4 with { Octave = 5 };
+            Assert.AreEqual(12, A5 - A4);
+            Assert.AreEqual(-12, A4 - A5);
+
+            var As4 = A4 with { Accidental = Accidental.Sharp };
+            Assert.AreEqual(1, As4 - A4);
+            Assert.AreEqual(-1, A4 - As4);
+
+            var Ab4 = A4 with { Accidental = Accidental.Flat };
+            Assert.AreEqual(-1, Ab4 - A4);
+            Assert.AreEqual(1, A4 - Ab4);
+
+            var Bs4 = B4 with { Accidental = Accidental.Sharp };
+            Assert.AreEqual(3, Bs4 - A4);
+            Assert.AreEqual(0, Bs4 - new Note('C', octave: 5));
+        }
+
+        [TestMethod]
+        public void Operator_Increment()
+        {
+            var note = new Note('A', Accidental.Flat);
+            note++;
+
+            // Flats always increment to natural, regardless of letter or octave
+            Assert.AreEqual(new Note('A'), note);
+
+            // Increment should be A sharp
+            note++;
+            Assert.AreEqual('A', note.Letter);
+            Assert.AreEqual(Accidental.Sharp, note.Accidental);
+
+            // test prefix increment
+            Assert.AreEqual(new Note('B'), ++note);
+            Assert.AreEqual(new Note('C', octave: 5), ++note);
+
+            // check if increment uses natural note name instead of something wacky like B#
+            Assert.AreEqual('C', note.Letter);
+            Assert.AreEqual(Accidental.Natural, note.Accidental);
+            Assert.AreEqual(5, note.Octave);
+
+            // test postfix increment
+            Assert.AreEqual(new Note('C', octave: 5), note++);
+            Assert.AreEqual(new Note('C', Accidental.Sharp, 5), note);
+
+            // test edge cases
+            note = new Note('E');
+            Assert.AreEqual(new Note('F'), ++note);
+
+            note = new Note('G', Accidental.Sharp);
+            Assert.AreEqual(new Note('A'), ++note);
+
+            var Esharp = new Note('E', Accidental.Sharp);
+            Assert.AreEqual(new Note('F', Accidental.Sharp), ++Esharp);
+
+            var Bsharp = new Note('B', Accidental.Sharp);
+            Assert.AreEqual(new Note('C', Accidental.Sharp, 5), ++Bsharp);
+        }
+
+        [TestMethod]
+        public void Operator_Decrement()
+        {
+            var note = new Note('G', Accidental.Sharp);
+            note--;
+
+            // Sharps always decrement to natural, regardless of letter or octave
+            Assert.AreEqual(new Note('G'), note);
+
+            // Decrement should be G flat
+            note--;
+            Assert.AreEqual(new Note('G', Accidental.Flat), note);
+            Assert.AreEqual(Accidental.Flat, note.Accidental);
+
+            // test prefix decrement
+            Assert.AreEqual(new Note('F'), --note);
+            Assert.AreEqual(new Note('E'), --note);
+
+            // check if decrement uses natural note name instead of something wacky like Fb
+            Assert.AreEqual('E', note.Letter);
+            Assert.AreEqual(Accidental.Natural, note.Accidental);
+            Assert.AreEqual(4, note.Octave);
+
+            // test postfix decrement
+            Assert.AreEqual(new Note('E'), note--);
+            Assert.AreEqual(new Note('E', Accidental.Flat), note);
+
+            // test edge cases
+            note = new Note('C');
+            Assert.AreEqual(new Note('B'), --note);
+
+            note = new Note('A', Accidental.Flat);
+            Assert.AreEqual(new Note('G'), --note);
+
+            var Fflat = new Note('F', Accidental.Flat);
+            Assert.AreEqual(new Note('E', Accidental.Flat), --Fflat);
+
+            var Cflat = new Note('C', Accidental.Flat);
+            Assert.AreEqual(new Note('B', Accidental.Flat, 3), --Cflat);
         }
 
         [TestMethod]
@@ -162,6 +313,14 @@ namespace ScaleSlayer.Core.Test
             Assert.AreEqual(Cs6, "C#6");
             Assert.AreEqual(Cs6, "CSharp6");
             Assert.AreEqual(Cs6, "C♯ 6");
+        }
+
+        [TestMethod]
+        public void ImplicitDouble()
+        {
+            Assert.AreEqual(440.0, new Note('A'));
+            Assert.AreEqual(261.6, new Note('C'), 0.1);
+            Assert.AreEqual(523.3, new Note('C', octave: 5), 0.1);
         }
     }
 }

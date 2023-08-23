@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
 namespace ScaleSlayer.Core
@@ -46,7 +47,7 @@ namespace ScaleSlayer.Core
         };
 
         private static readonly double ratio_equalTemperament =
-            Math.Pow(2, 1 / 12);
+            Math.Pow(2.0, 1.0 / 12.0);
 
         /// <summary>
         /// Regex used to convert a string representation of a note into a <see cref="Note"/>.
@@ -161,6 +162,27 @@ namespace ScaleSlayer.Core
             _ => throw new InvalidEnumArgumentException("Property \"Accidental\" has a non-standard enum value.")
         };
 
+        /// <summary>
+        /// Returns the distance, in semitones, from C4.
+        /// </summary>
+        /// <returns>Returns an <see cref="int"/>, where C4 == 0</returns>
+        public int DistanceToMiddleC()
+        {
+            var testNote = Accidental == Accidental.Flat ? Enharmonic() : this;
+            return testNote.Letter switch
+            {
+                'A' or 'B' =>
+                    ((testNote.Letter - 'A') * 2) + 9 +
+                    (testNote.Accidental == Accidental.Sharp ? 1 : 0),
+                'C' or 'D' or 'E' =>
+                    ((testNote.Letter - 'C') * 2) +
+                    (testNote.Accidental == Accidental.Sharp ? 1 : 0),
+                _ =>
+                    ((testNote.Letter - 'F') * 2) + 5 +
+                    (testNote.Accidental == Accidental.Sharp ? 1 : 0)
+            } + ((Octave - 4) * 12);
+        }
+
         #endregion
 
 
@@ -188,6 +210,17 @@ namespace ScaleSlayer.Core
 
             // construct new note object
             return new Note(letter, accidental, octave);
+        }
+
+        /// <summary>
+        /// Implicitly converts a <see cref="Note"/> into its frequency value in Hertz (Hz) using equal temperment
+        /// </summary>
+        /// <param name="note">The <see cref="Note"/> object to convert into Hz</param>
+        public static implicit operator double(Note note)
+        {
+            const double standardTuning = 440.0;
+
+            return standardTuning * Math.Pow(ratio_equalTemperament, note - new Note('A', octave: 4));
         }
 
         #endregion
@@ -247,30 +280,105 @@ namespace ScaleSlayer.Core
         /// <returns>Returns true if the notes compared do note represent the same note (or are not enharmonic)</returns>
         public static bool operator !=(Note left, Note right) => !(left == right);
 
+        /// <summary>
+        /// Returns the distance between two notes as semitones
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static int operator -(Note left, Note right) =>
+            left.DistanceToMiddleC() - right.DistanceToMiddleC();
+
+        // TODO: THE FOLLOWING DOES NOT ACCOUNT FOR CENTS YET
+        public static bool operator >(Note left, Note right) =>
+            left.DistanceToMiddleC() > right.DistanceToMiddleC();
+
+        public static bool operator <(Note left, Note right) =>
+            left.DistanceToMiddleC() < right.DistanceToMiddleC();
+
+        public static Note operator ++(Note note)
+        {
+            note = note.Accidental switch
+            {
+                Accidental.Flat => note with { Accidental = Accidental.Natural },
+                Accidental.Natural => note.Letter switch
+                {
+                    'B' => note with { Letter = 'C', Octave = note.Octave + 1},
+                    'E' => note with { Letter = 'F' },
+                    _ => note with { Accidental = Accidental.Sharp }
+                },
+                Accidental.Sharp => note.Letter switch
+                {
+                    'B' => note with { Letter = 'C', Octave = note.Octave + 1 },
+                    'E' => note with { Letter = 'F' },
+                    'G' => note with { Letter = 'A', Accidental = Accidental.Natural },
+                    _ => note with { Letter = (char)(note.Letter + 1), Accidental = Accidental.Natural }
+                },
+                _ => throw new InvalidEnumArgumentException("Property \"Accidental\" has a non-standard enum value.")
+            };
+            return note;
+        }
+
+        public static Note operator --(Note note)
+        {
+            note = note.Accidental switch
+            {
+                Accidental.Flat => note.Letter switch
+                {
+                    'C' => note with { Letter = 'B', Octave = note.Octave - 1 },
+                    'F' => note with { Letter = 'E' },
+                    'A' => note with { Letter = 'G', Accidental = Accidental.Natural },
+                    _ => note with { Letter = (char)(note.Letter - 1), Accidental = Accidental.Natural, }
+                },
+                Accidental.Natural => note.Letter switch
+                {
+                    'C' => note with { Letter = 'B', Octave = note.Octave - 1 },
+                    'F' => note with { Letter = 'E' },
+                    _ => note with { Accidental = Accidental.Flat }
+                },
+                Accidental.Sharp => note with { Accidental = Accidental.Natural },
+                _ => throw new InvalidEnumArgumentException("Property \"Accidental\" has a non-standard enum value.")
+            };
+            return note;
+        }
+
+
         #endregion
 
 
-        ///// <summary>
-        ///// Returns a new <see cref="Note"/> that's offset by a certain number of <paramref name="semitones"/>.
-        ///// </summary>
-        ///// <param name="note"></param>
-        ///// <param name="semitones"></param>
-        ///// <returns></returns>
-        //public static Note operator +(Note note, int semitones)
-        //{
-        //    int newOctave = note.Octave + (semitones / 12);
-        //    return new 
-        //}
+        /// <summary>
+        /// Returns a new <see cref="Note"/> that's offset by a certain number of <paramref name="semitones"/>.
+        /// </summary>
+        /// <param name="note"></param>
+        /// <param name="semitones"></param>
+        /// <returns></returns>
+        public static Note operator +(Note note, int semitones)
+        {
+            if (semitones == 0) 
+                return note;
 
-        ///// <summary>
-        ///// Implicitly converts a <see cref="Note"/> into its frequency value in Hertz (Hz) using equal temperment
-        ///// </summary>
-        ///// <param name="note">The <see cref="Note"/> object to convert into Hz</param>
-        //public static implicit operator double(Note note)
-        //{
-        //    const double standardTuning = 440.0;
-        //
-        //}
+            var newNote = note with { Octave = note.Octave + semitones / 12 };
+
+            int offset = semitones % 12;
+
+            while (offset != 0)
+            {
+                if (offset > 0)
+                {
+                    newNote++;
+                    offset--;
+                }
+                else
+                {
+                    newNote--;
+                    offset++;
+                }
+            }
+
+            return newNote;
+        }
+
+
         //
         //public static bool operator >(Note left, Note right)
         //{
@@ -282,11 +390,6 @@ namespace ScaleSlayer.Core
         //    {
         //        if 
         //    }
-        //}
-        //
-        //public static (int Semitones, int Cents) operator -(Note left, Note right)
-        //{
-        //
         //}
     }
 
