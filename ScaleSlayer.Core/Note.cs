@@ -46,8 +46,22 @@ namespace ScaleSlayer.Core
             { "♯", Accidental.Sharp }
         };
 
-        private static readonly double ratio_equalTemperament =
-            Math.Pow(2.0, 1.0 / 12.0);
+        /// <summary>
+        /// The frequency (in Hz) of A4 that would be used to tune all other notes in equal temperament.
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when setter receives value less than or equal to 0</exception>
+        public static double Tuning
+        {
+            get { return _tuning; }
+            set
+            {
+                if (value > 0)
+                    _tuning = value;
+                else
+                    throw new ArgumentOutOfRangeException("Tuning must be a nonzero Hz value greater than 0.");
+            }
+        }
+        private static double _tuning = 440.0;
 
         /// <summary>
         /// Regex used to convert a string representation of a note into a <see cref="Note"/>.
@@ -183,6 +197,20 @@ namespace ScaleSlayer.Core
             } + ((Octave - 4) * 12);
         }
 
+        /// <summary>
+        /// Returns the Hertz representation of this note based off of the global <see cref="Tuning"/>
+        /// </summary>
+        /// <returns>Returns a <see cref="double"/> that represents the frequency of the note in Hz</returns>
+        public double ToHertz() => ToHertz(Tuning);
+
+        /// <summary>
+        /// Returns the Hertz representation of this note based off of a custom tuning of A4
+        /// </summary>
+        /// <param name="tuning">The frequency of A4 in Hz</param>
+        /// <returns>Returns a <see cref="double"/> that represents the frequency of the note in Hz</returns>
+        public double ToHertz(double tuning) =>
+            tuning * Math.Pow(Math.Pow(2.0, 1.0 / 12.0), this - new Note('A', octave: 4));
+
         #endregion
 
 
@@ -216,12 +244,7 @@ namespace ScaleSlayer.Core
         /// Implicitly converts a <see cref="Note"/> into its frequency value in Hertz (Hz) using equal temperment
         /// </summary>
         /// <param name="note">The <see cref="Note"/> object to convert into Hz</param>
-        public static implicit operator double(Note note)
-        {
-            const double standardTuning = 440.0;
-
-            return standardTuning * Math.Pow(ratio_equalTemperament, note - new Note('A', octave: 4));
-        }
+        public static implicit operator double(Note note) => note.ToHertz();
 
         #endregion
 
@@ -377,26 +400,5 @@ namespace ScaleSlayer.Core
 
             return newNote;
         }
-
-
-        //
-        //public static bool operator >(Note left, Note right)
-        //{
-        //    if (left.Octave != right.Octave)
-        //    {
-        //        return left.Octave > right.Octave;
-        //    }
-        //    else
-        //    {
-        //        if 
-        //    }
-        //}
-    }
-
-    public enum Accidental
-    {
-        Natural,
-        Flat,
-        Sharp
     }
 }
