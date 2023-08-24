@@ -24,6 +24,7 @@ namespace ScaleSlayer.Core
         Whole = 2,
         MinorThird = 3,
         WholeHalf = 3,
+        AugmentedSecond = 3,
         MajorThird = 4,
         Fourth = 5,
         Tritone = 6,
