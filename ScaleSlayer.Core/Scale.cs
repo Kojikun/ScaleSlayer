@@ -44,10 +44,17 @@ namespace ScaleSlayer.Core
         /// <example>
         /// Generate(new Note('A')).Take(8) will generate the full scale.
         /// </example>
-        /// <exception cref="NotImplementedException"></exception>
         public IEnumerable<Note> Generate(Note root)
         {
-            throw new NotImplementedException();
+            Note current = root;
+            var currentIndex = ModeIndex;
+            while (true)
+            {
+                yield return current;
+                var currentInterval = Intervals[currentIndex];
+                current += (int)currentInterval;
+                currentIndex = (currentIndex + 1) % Intervals.Count;
+            }
         }
     }
 }
