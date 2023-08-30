@@ -31,6 +31,8 @@ namespace ScaleSlayer.Core
             get => Mode - 1;
         }
 
+        public Scale(params Interval[] intervals) : this((IEnumerable<Interval>)intervals) { }
+
         public Scale(IEnumerable<Interval> intervals)
         {
             Intervals.AddRange(intervals);
@@ -46,13 +48,28 @@ namespace ScaleSlayer.Core
         /// </example>
         public IEnumerable<Note> Generate(Note root)
         {
+            // start from root note
             Note current = root;
             var currentIndex = ModeIndex;
+
             while (true)
             {
+                // yield current note to caller
                 yield return current;
+                var previous = current;
+
+                // calculate next note using current interval
                 var currentInterval = Intervals[currentIndex];
                 current += (int)currentInterval;
+
+                // ensure that the next letter does not equal the previous one
+                if (current.Letter == previous.Letter)
+                    // if so, return the enharmonic instead
+                    // incrementing up the scale will always return sharps,
+                    // so this ensures that flats will be displayed, too
+                    current = current.Enharmonic();
+
+                // use the next interval in the sequence
                 currentIndex = (currentIndex + 1) % Intervals.Count;
             }
         }

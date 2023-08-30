@@ -10,10 +10,9 @@ namespace ScaleSlayer.Core
     {
         #region Major Modes
 
-        public static readonly Scale Major = new(new[]
-        {
+        public static readonly Scale Major = new(
             Interval.Whole, Interval.Whole, Interval.Half, Interval.Whole, Interval.Whole, Interval.Whole, Interval.Half
-        });
+        );
         public static readonly Scale Dorian = Major with { Mode = 2 };
         public static readonly Scale Phrygian = Major with { Mode = 3 };
         public static readonly Scale Lydian = Major with { Mode = 4 };
@@ -29,10 +28,9 @@ namespace ScaleSlayer.Core
 
         #region Melodic Minor Modes
 
-        public static readonly Scale MelodicMinor = new(new[]
-        {
+        public static readonly Scale MelodicMinor = new(
             Interval.Whole, Interval.Half, Interval.Whole, Interval.Whole, Interval.Whole, Interval.Whole, Interval.Half
-        });
+        );
         public static readonly Scale DorianFlat2 = MelodicMinor with { Mode = 2 };
         public static readonly Scale PhrygianSharp6 = DorianFlat2;
         public static readonly Scale LydianAugmented = MelodicMinor with { Mode = 3 };
@@ -53,10 +51,9 @@ namespace ScaleSlayer.Core
 
         #region Harmonic Minor Modes
 
-        public static readonly Scale HarmonicMinor = new(new[]
-        {
+        public static readonly Scale HarmonicMinor = new(
             Interval.Whole, Interval.Half, Interval.Whole, Interval.Whole, Interval.Half, Interval.WholeHalf, Interval.Half
-        });
+        );
         public static readonly Scale LocrianSharp6 = HarmonicMinor with { Mode = 2 };
         public static readonly Scale IonianSharp5 = HarmonicMinor with { Mode = 3 };
         public static readonly Scale RomanianMinor = HarmonicMinor with { Mode = 4 };
@@ -73,10 +70,9 @@ namespace ScaleSlayer.Core
 
         #region Harmonic Major Modes
 
-        public static readonly Scale HarmonicMajor = new(new[]
-        {
+        public static readonly Scale HarmonicMajor = new(
             Interval.Whole, Interval.Whole, Interval.Half, Interval.Whole, Interval.Half, Interval.WholeHalf, Interval.Half
-        });
+        );
         public static readonly Scale DorianFlat5 = HarmonicMajor with { Mode = 2 };
         public static readonly Scale LocrianSharp2Sharp6 = DorianFlat5;
         public static readonly Scale PhrygianFlat4 = HarmonicMajor with { Mode = 3 };
@@ -91,10 +87,9 @@ namespace ScaleSlayer.Core
 
         #region Double Harmonic Modes
 
-        public static readonly Scale DoubleHarmonic = new(new[]
-        {
+        public static readonly Scale DoubleHarmonic = new(
             Interval.Half, Interval.WholeHalf, Interval.Half, Interval.Whole, Interval.Half, Interval.WholeHalf, Interval.Half
-        });
+        );
         public static readonly Scale Mayamalavagowla = DoubleHarmonic;
         public static readonly Scale BhairavRaga = DoubleHarmonic;
         public static readonly Scale Byzantine = DoubleHarmonic;
@@ -116,15 +111,14 @@ namespace ScaleSlayer.Core
 
         #region Special Scales
 
-        public static readonly Scale Diminished = new(new[]
-        {
+        public static readonly Scale Diminished = new(
             Interval.Whole, Interval.Half
-        });
+        );
         public static readonly Scale Octatonic = Diminished;
         public static readonly Scale InvertedDiminished = Diminished with { Mode = 2 };
 
-        public static readonly Scale WholeTone = new(new[] { Interval.Whole });
-        public static readonly Scale Chromatic = new(new[] { Interval.Half });
+        public static readonly Scale WholeTone = new(Interval.Whole );
+        public static readonly Scale Chromatic = new(Interval.Half );
 
         #endregion
     }
