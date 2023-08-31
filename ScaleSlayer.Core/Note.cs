@@ -384,6 +384,8 @@ namespace ScaleSlayer.Core
 
             int offset = semitones % 12;
 
+            // i know this aint the fastest, but this is the safe way
+            // i'm sure i'll think of better logic for this in the future
             while (offset != 0)
             {
                 if (offset > 0)
@@ -400,5 +402,7 @@ namespace ScaleSlayer.Core
 
             return newNote;
         }
+
+        public static Note operator -(Note note, int semitones) => note + (-semitones);
     }
 }

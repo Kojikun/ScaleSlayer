@@ -294,6 +294,24 @@ namespace ScaleSlayer.Core.Test
         }
 
         [TestMethod]
+        public void Operator_Add()
+        {
+            var note = new Note('A');
+            Assert.AreEqual(new Note('A', Accidental.Sharp), note + 1);
+            Assert.AreEqual(new Note('B'), note + 2);
+            Assert.AreEqual(new Note('A', octave: 5), note + 12);
+            Assert.AreEqual(new Note('A', Accidental.Sharp, octave: 5), note + 13);
+
+            Assert.AreEqual(new Note('A', Accidental.Flat), note + (-1));
+            Assert.AreEqual(new Note('E'), note + (-5));
+            Assert.AreEqual(new Note('A', octave: 0), note + (-48));
+
+            Assert.AreEqual(new Note('A', Accidental.Flat), note - 1);
+            Assert.AreEqual(new Note('E'), note - 5);
+            Assert.AreEqual(new Note('A', octave: 0), note - 48);
+        }
+
+        [TestMethod]
         public void ImplicitString()
         {
             // construct A4 from string
