@@ -9,12 +9,21 @@ namespace ScaleSlayer.Core
 {
     public record Scale
     {
+        /// <summary>
+        /// A list of intervals that define where the next note in the scale lies
+        /// </summary>
         public List<Interval> Intervals { get; set; } = new List<Interval>();
 
+        /// <summary>
+        /// The 1-indexed Mode (Scale degree) used to define where in the <see cref="Intervals"/> list to start generating notes from
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Thrown when the Mode is attempted to be set outside the length of the <see cref="Intervals"/> list
+        /// </exception>
         public int Mode
         {
             get { return _mode; }
-            set
+            init
             {
                 if (value > 0 && value <= Intervals.Count)
                     _mode = value;
@@ -26,13 +35,24 @@ namespace ScaleSlayer.Core
         }
         private int _mode = 1;
 
+        /// <summary>
+        /// Helper property to zero-index the current <see cref="Mode"/>
+        /// </summary>
         private int ModeIndex
         {
             get => Mode - 1;
         }
 
+        /// <summary>
+        /// Constructs a new scale using a set of intervals
+        /// </summary>
+        /// <param name="intervals">A list of intervals that form the scale</param>
         public Scale(params Interval[] intervals) : this((IEnumerable<Interval>)intervals) { }
 
+        /// <summary>
+        /// Constructs a new scale using a set of intervals
+        /// </summary>
+        /// <param name="intervals">A list of intervals that form the scale</param>
         public Scale(IEnumerable<Interval> intervals)
         {
             Intervals.AddRange(intervals);
