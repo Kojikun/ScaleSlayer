@@ -61,12 +61,20 @@ namespace ScaleSlayer.Core
         /// <summary>
         /// Generates a list of notes separated by the intervals stored in the scale
         /// </summary>
-        /// <param name="root"></param>
+        /// <param name="root">The root <see cref="Note"/> for the scale to start generating notes from</param>
+        /// <param name="retainOrder">Whether to attempt to retain the alphabetical ordering of notes within a scale</param>
         /// <returns>Returns an iterator that points to the next note in the scale</returns>
+        /// <remarks>
+        /// Returned notes will attempt to resemble the natural ordering of letters.
+        /// Double-flats/sharps are not implemented in the <see cref="Note"/> class,
+        /// so the natural ordering of returned notes will not be preserved
+        /// if the next letter in the sequence would require one of those accidentals.
+        /// If <paramref name="retainOrder"/> is false, only sharps or naturals would be returned.
+        /// </remarks>
         /// <example>
         /// Generate(new Note('A')).Take(8) will generate the full scale.
         /// </example>
-        public IEnumerable<Note> Generate(Note root)
+        public IEnumerable<Note> Generate(Note root, bool retainOrder = true)
         {
             // start from root note
             Note current = root;
@@ -82,12 +90,16 @@ namespace ScaleSlayer.Core
                 var currentInterval = Intervals[currentIndex];
                 current += (int)currentInterval;
 
-                // ensure that the next letter does not equal the previous one
-                if (current.Letter == previous.Letter)
-                    // if so, return the enharmonic instead
-                    // incrementing up the scale will always return sharps,
-                    // so this ensures that flats will be displayed, too
-                    current = current.Enharmonic();
+                // ensure that the next note's letter follows the
+                // natural ordering of letters in a scale
+                char nextLetter = (char)(((previous.Letter + 1 - 'A') % 7) + 'A');
+                if (retainOrder && (current.Letter != nextLetter))
+                {
+                    if (current.Enharmonic().Letter == nextLetter)
+                    {
+                        current = current.Enharmonic();
+                    }    
+                }
 
                 // use the next interval in the sequence
                 currentIndex = (currentIndex + 1) % Intervals.Count;

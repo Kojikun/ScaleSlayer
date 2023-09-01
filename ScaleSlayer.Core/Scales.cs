@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace ScaleSlayer.Core
 {
+    /// <summary>
+    /// Provides a collection of pre-defined scales to use
+    /// </summary>
     public static class Scales
     {
         #region Major Modes

@@ -10,7 +10,7 @@ namespace ScaleSlayer.Core.Test
     public class ScaleTest
     {
         [TestMethod]
-        public void TestGenerate()
+        public void Generate()
         {
             // Generate an 8 note scale from root
             var CMajorScale = Scales.Major.Generate("C4").Take(8).ToArray();
@@ -71,16 +71,46 @@ namespace ScaleSlayer.Core.Test
             Assert.AreEqual("G5", AMinorScale[6]);
             Assert.AreEqual("A5", AMinorScale[7]);
 
-            var CHarmonicMinor = Scales.HarmonicMinor.Generate("C4").Take(8).ToArray();
-            Assert.AreEqual(8, CHarmonicMinor.Length);
-            Assert.AreEqual("C4", CHarmonicMinor[0]);
-            Assert.AreEqual("D4", CHarmonicMinor[1]);
-            Assert.AreEqual("Eb4", CHarmonicMinor[2]);
-            Assert.AreEqual("F4", CHarmonicMinor[3]);
-            Assert.AreEqual("G4", CHarmonicMinor[4]);
-            Assert.AreEqual("Ab4", CHarmonicMinor[5]);
-            Assert.AreEqual("B4", CHarmonicMinor[6]);
-            Assert.AreEqual("C5", CHarmonicMinor[7]);
+            var CHarmonicMinorScale = Scales.HarmonicMinor.Generate("C4").Take(8).ToArray();
+            Assert.AreEqual(8, CHarmonicMinorScale.Length);
+            Assert.AreEqual("C4", CHarmonicMinorScale[0]);
+            Assert.AreEqual("D4", CHarmonicMinorScale[1]);
+            Assert.AreEqual("Eb4", CHarmonicMinorScale[2]);
+            Assert.AreEqual("F4", CHarmonicMinorScale[3]);
+            Assert.AreEqual("G4", CHarmonicMinorScale[4]);
+            Assert.AreEqual("Ab4", CHarmonicMinorScale[5]);
+            Assert.AreEqual("B4", CHarmonicMinorScale[6]);
+            Assert.AreEqual("C5", CHarmonicMinorScale[7]);
+
+            // test natural ordering of letters
+            // Letters() method is a helper function specifically for tests
+            // defined in TestUtilities.cs
+            var FsMajorScale = Scales.Major.Generate("F#").Take(8).ToArray();
+            Assert.AreEqual("FGABCDEF", FsMajorScale.Letters());
+
+            var GbMajorScale = Scales.Major.Generate("Gb").Take(8).ToArray();
+            Assert.AreEqual("GABCDEFG", GbMajorScale.Letters());
+
+            var CbMajorScale = Scales.Major.Generate("Cb").Take(8).ToArray();
+            Assert.AreEqual("CDEFGABC", CbMajorScale.Letters());
+
+            // Whole-tone scale
+            var CWholeToneScale = Scales.WholeTone.Generate("C4").Take(13).ToArray();
+
+            // attempt at a natural ordering messes up due to "B sharp" as the octave
+            Assert.AreNotEqual("CDEFGACDEFGAC", CWholeToneScale.Letters());
+
+            // disregard natural ordering
+            CWholeToneScale = Scales.WholeTone.Generate("C4", retainOrder: false).Take(13).ToArray();
+            Assert.AreEqual("CDEFGACDEFGAC", CWholeToneScale.Letters());
+
+            // Forcing a different accidental
+            CWholeToneScale = Scales.WholeTone.Generate("C4").OfAccidental(Accidental.Flat).Take(13).ToArray();
+            Assert.AreEqual("CDEGABCDEGABC", CWholeToneScale.Letters());
+
+            // Chromatic scale
+            var CChromaticScale = Scales.Chromatic.Generate("C4", retainOrder: false).Take(13).ToArray();
+            Assert.AreEqual("CCDDEFFGGAABC", CChromaticScale.Letters());
         }
     }
 }
